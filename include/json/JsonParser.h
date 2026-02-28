@@ -84,31 +84,34 @@ namespace Json {
         inline bool isObject() const noexcept { return m_type == JsonType::Object; }
         inline bool isArray() const noexcept { return m_type == JsonType::Array; }
         inline bool isNull() const noexcept { return m_type == JsonType::Null; }
-        bool isEmpty() const;
 
-        // Cast methods might throw JsonTypeException when casting to the wrong type
-        bool toBool() const;
-        int toInt() const;
-        double toDouble() const;
-        const std::string& toString() const;
-        const JsonObject& toObject() const;
-        const JsonArray& toArray() const;
+        // Generic type check
+        template<typename T>
+        bool is() const { return false; };
 
-        // Read / Write casts
+        // Const Cast methods
+
+        inline const bool& toBool() const { return const_cast<const bool&>(const_cast<JsonValue*>(this)->toBool()); };
+        inline const int& toInt() const { return const_cast<const int&>(const_cast<JsonValue*>(this)->toInt()); };
+        inline const double& toDouble() const { return const_cast<const double&>(const_cast<JsonValue*>(this)->toDouble()); };
+        inline const std::string& toString() const { return const_cast<const std::string&>(const_cast<JsonValue*>(this)->toString()); };
+        inline const JsonObject& toObject() const { return const_cast<const JsonObject&>(const_cast<JsonValue*>(this)->toObject()); };
+        inline const JsonArray& toArray() const { return const_cast<const JsonArray&>(const_cast<JsonValue*>(this)->toArray()); };
+
+        // Read / Write casts that throw JsonTypeException when casting to the wrong type
+
+        bool& toBool();
+        int& toInt();
+        double& toDouble();
         std::string& toString();
         JsonObject& toObject();
         JsonArray& toArray();
 
         // Safe accessors (bounds checking + type checking)
-        const JsonValue& at(const std::string& key) const;
-        const JsonValue& at(size_t index) const;
-        JsonValue& at(const std::string& key);
-        JsonValue& at(size_t index);
 
-        // Unsafe accessors (no bounds checking + type checking)
-        const JsonValue& operator[](const std::string& key) const; // Throws error when accessing non existent one
+        const JsonValue& operator[](const std::string& key) const;
         const JsonValue& operator[](size_t index) const;
-        JsonValue& operator[](const std::string& key); // Infers default value if non existent value is accessed
+        JsonValue& operator[](const std::string& key);
         JsonValue& operator[](size_t index);
 
         bool operator==(const JsonValue& other) const;
@@ -127,6 +130,22 @@ namespace Json {
         JsonValue& operator=(JsonArray&& value);
         JsonValue& operator=(JsonValue&& other) noexcept;
         JsonValue& operator=(std::nullptr_t) noexcept;
+
+        // Cast operators for static_cast
+
+        inline explicit operator const bool&() const { return toBool(); }
+        inline explicit operator const int&() const { return toInt(); }
+        inline explicit operator const double&() const { return toDouble(); }
+        inline explicit operator const std::string&() const { return toString(); }
+        inline explicit operator const JsonObject&() const { return toObject(); }
+        inline explicit operator const JsonArray&() const { return toArray(); }        
+
+        inline explicit operator bool&() { return toBool(); }
+        inline explicit operator int&() { return toInt(); }
+        inline explicit operator double&() { return toDouble(); }
+        inline explicit operator std::string&() { return toString(); }
+        inline explicit operator JsonObject&() { return toObject(); }
+        inline explicit operator JsonArray&() { return toArray(); }
 
         friend std::string toJsonString(const JsonValue& value);
     };

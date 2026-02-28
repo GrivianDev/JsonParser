@@ -492,46 +492,22 @@ Json::JsonValue::JsonValue(Json::JsonValue&& other) noexcept {
     other.m_type = Json::JsonType::Null;
 }
 
-bool Json::JsonValue::isEmpty() const {
-    if (isObject()) return o_value->empty();
-    if (isArray()) return a_value->empty();
-    throw Json::JsonTypeException("Cannot check emptiness for non-object/array types");
-}
-
-bool Json::JsonValue::toBool() const {
+bool &Json::JsonValue::toBool() {
     if (!isBool())
-        throw Json::JsonTypeException("Cannot cast to C++ BOOL because underlying type is " + jsonTypeToString(m_type));
+        throw Json::JsonTypeException("Cannot cast to C++ BOOL because the underlying type is " + jsonTypeToString(m_type));
     return b_value;
 }
 
-int Json::JsonValue::toInt() const {
+int& Json::JsonValue::toInt() {
     if (!isInt())
-        throw Json::JsonTypeException("Cannot cast to C++ INTEGER because underlying type is " + jsonTypeToString(m_type));
+        throw Json::JsonTypeException("Cannot cast to C++ INTEGER because the underlying type is " + jsonTypeToString(m_type));
     return i_value;
 }
 
-double Json::JsonValue::toDouble() const {
+double& Json::JsonValue::toDouble() {
     if (!isDouble())
         throw Json::JsonTypeException("Cannot cast to C++ DOUBLE because the underlying type is " + jsonTypeToString(m_type));
     return d_value;
-}
-
-const std::string& Json::JsonValue::toString() const {
-    if (!isString())
-        throw Json::JsonTypeException("Cannot cast to C++ STRING because the underlying type is " + jsonTypeToString(m_type));
-    return *s_value;
-}
-
-const Json::JsonObject& Json::JsonValue::toObject() const {
-    if (!isObject())
-        throw Json::JsonTypeException("Cannot cast to C++ OBJECT because the underlying type is " + jsonTypeToString(m_type));
-    return *o_value;
-}
-
-const Json::JsonArray& Json::JsonValue::toArray() const {
-    if (!isArray())
-        throw Json::JsonTypeException("Cannot cast to C++ ARRAY because the underlying type is " + jsonTypeToString(m_type));
-    return *a_value;
 }
 
 std::string& Json::JsonValue::toString() {
@@ -552,30 +528,6 @@ Json::JsonArray& Json::JsonValue::toArray() {
     return *a_value;
 }
 
-const Json::JsonValue &Json::JsonValue::at(const std::string& key) const {
-    if (!isObject())
-        throw Json::JsonTypeException("Accessing key in non-object type");
-    return static_cast<const Json::JsonObject*>(o_value)->at(key);
-}
-
-const Json::JsonValue& Json::JsonValue::at(size_t index) const {
-    if (!isArray())
-        throw Json::JsonTypeException("Accessing index in non-array type");
-    return static_cast<const Json::JsonArray*>(a_value)->at(index);
-}
-
-Json::JsonValue& Json::JsonValue::at(const std::string& key) {
-    if (!isObject())
-        throw Json::JsonTypeException("Accessing key in non-object type");
-    return o_value->at(key);
-}
-
-Json::JsonValue& Json::JsonValue::at(size_t index) {
-    if (!isArray())
-        throw Json::JsonTypeException("Accessing index in non-array type");
-    return a_value->at(index);
-}
-
 const Json::JsonValue& Json::JsonValue::operator[](const std::string& key) const {
     if (!isObject())
         throw Json::JsonTypeException("Accessing key in non-object type");
@@ -585,19 +537,19 @@ const Json::JsonValue& Json::JsonValue::operator[](const std::string& key) const
 const Json::JsonValue& Json::JsonValue::operator[](size_t index) const {
     if (!isArray())
         throw Json::JsonTypeException("Accessing index in non-array type");
-    return static_cast<const Json::JsonArray&>(*a_value)[index];
+    return static_cast<const Json::JsonArray*>(a_value)->at(index);
 }
 
 Json::JsonValue& Json::JsonValue::operator[](const std::string& key) {
     if (!isObject())
         throw Json::JsonTypeException("Accessing key in non-object type");
-    return (*o_value)[key];
+    return o_value->at(key);
 }
 
 Json::JsonValue& Json::JsonValue::operator[](size_t index) {
     if (!isArray())
         throw Json::JsonTypeException("Accessing index in non-array type");
-    return (*a_value)[index];
+    return a_value->at(index);
 }
 
 bool Json::JsonValue::operator==(const Json::JsonValue& other) const {
@@ -746,6 +698,27 @@ Json::JsonValue& Json::JsonValue::operator=(std::nullptr_t) noexcept {
     m_type = Json::JsonType::Null;
     return *this;
 }
+
+template<>
+bool Json::JsonValue::is<bool>() const { return isBool(); }
+
+template<>
+bool Json::JsonValue::is<int>() const { return isInt(); }
+
+template<>
+bool Json::JsonValue::is<double>() const { return isDouble(); }
+
+template<>
+bool Json::JsonValue::is<std::string>() const { return isString(); }
+
+template<>
+bool Json::JsonValue::is<Json::JsonObject>() const { return isObject(); }
+
+template<>
+bool Json::JsonValue::is<Json::JsonArray>() const { return isArray(); }
+
+template<>
+bool Json::JsonValue::is<std::nullptr_t>() const { return isNull(); }
 
 std::ostream& Json::operator<<(std::ostream& os, const JsonValue& value) {
     os << Json::toJsonString(value);

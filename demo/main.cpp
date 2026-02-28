@@ -23,7 +23,7 @@ int main() {
 
         // Creating an array with values
         JsonArray arr = { boolVal, intVal, doubleVal, stringVal };
-        JsonValue arrVal(arr);
+        JsonValue arrVal(std::move(arr));
 
         // Printing the objects and array
         std::cout << "Boolean Value: " << boolVal << std::endl;
@@ -36,6 +36,8 @@ int main() {
         std::cout << "Converted to native Integer Value: " << intVal.toInt() << std::endl;
         std::cout << "Converted to native Double Value: " << doubleVal.toDouble() << std::endl;
         std::cout << "Converted to native String Value: " << stringVal.toString() << std::endl;
+
+        std::cout << "Converted to native String Value via static_cast: " << static_cast<std::string>(stringVal) << std::endl;
 
         std::cout << "Object Value (key1): " << objVal["key1"] << std::endl;
         std::cout << "Array Value (index 1): " << arrVal[1] << std::endl;

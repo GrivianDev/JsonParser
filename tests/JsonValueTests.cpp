@@ -97,22 +97,13 @@ TEST(JsonValueTests, ComparisonOperators) {
     EXPECT_NE(val1, val3);
 }
 
-TEST(JsonValueTests, OperatorAccessNonConstObject) {
+TEST(JsonValueTests, OperatorAccessObject) {
     JsonObject obj = {{"key", 42}};
     JsonValue value(obj);
 
     EXPECT_NO_THROW(value["key"]);
     EXPECT_EQ(value["key"].toInt(), 42);
-    EXPECT_TRUE(value["nonexistent"].isNull()); // Can infer default constructed on non const
-}
-
-TEST(JsonValueTests, OperatorAccessConstObject) {
-    JsonObject obj = {{"key", 42}};
-    const JsonValue value(obj);
-
-    EXPECT_NO_THROW(value["key"]);
-    EXPECT_EQ(value["key"].toInt(), 42);
-    EXPECT_THROW(value["nonexistent"], std::out_of_range); // Cannot infer default constructed on const
+    EXPECT_THROW(value["nonexistent"], std::out_of_range);
 }
 
 TEST(JsonValueTests, OperatorAccessArray) {
@@ -123,7 +114,7 @@ TEST(JsonValueTests, OperatorAccessArray) {
     EXPECT_EQ(value[0].toInt(), 1);
     EXPECT_NO_THROW(value[2]);
     EXPECT_EQ(value[2].toInt(), 3);
-    EXPECT_THROW(value.at(10), std::out_of_range);
+    EXPECT_THROW(value[10], std::out_of_range);
 }
 
 TEST(JsonValueTests, OperatorReassignObject) {
@@ -133,7 +124,7 @@ TEST(JsonValueTests, OperatorReassignObject) {
     EXPECT_NO_THROW(value["key"] = 100);
     EXPECT_EQ(value["key"].toInt(), 100);
 
-    EXPECT_NO_THROW(value["new_key"] = 200);
+    value.toObject().emplace("new_key", 200);
     EXPECT_EQ(value["new_key"].toInt(), 200);
 
     // Ensure that the original value is still reassigned correctly
