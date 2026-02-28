@@ -135,6 +135,7 @@ namespace Json {
 
     std::string toJsonString(const JsonValue& value);
     JsonValue parseJson(const std::string& json);
+    JsonValue parseJson(const char* json, size_t jsonLength);
 
     inline std::string jsonTypeToString(JsonType type) {
         switch (type) {

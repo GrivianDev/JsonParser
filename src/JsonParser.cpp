@@ -771,6 +771,10 @@ std::string Json::toJsonString(const Json::JsonValue& value) {
 }
 
 Json::JsonValue Json::parseJson(const std::string& json) {
-    SubString substrJson = { json.c_str(), json.length() };
+    return parseJson(json.c_str(), json.length());
+}
+
+Json::JsonValue Json::parseJson(const char* json, size_t jsonLength) {
+    SubString substrJson = { json, jsonLength };
     return internalParseJson(substrJson);
 }
