@@ -8,33 +8,18 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clean build directory
-      run: rm -rf build
+    - uses: actions/checkout@v6.0.2
     
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up CMake
-      uses: jwlawson/actions-setup-cmake@v2
-      with:
-        cmake-version: '3.30.0'
-
     - name: Install dependencies
-      run: |
-        sudo apt-get install -y g++ cmake make
+      run: sudo apt-get update && sudo apt-get install -y g++ cmake make
 
     - name: Build with CMake
       run: |
-        mkdir build
-        cd build
-        cmake .. -DBUILD_JSONPARSER_TESTS=ON
-        make
+        cmake -S . -B build -DBUILD_JSONPARSER_TESTS=ON
+        cmake --build build
 
     - name: Run tests
-      run: |
-        cd build
-        ctest --output-on-failure
+      run: ctest --test-dir build --output-on-failure
